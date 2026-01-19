@@ -149,15 +149,14 @@ export default function AccountSettingsPage() {
     setUpdateMessage(null);
 
     try {
-      const { error } = await authClient.updateUser({
+      // Use the server action to update the public profile (DB)
+      const result = await updateProfile({
         name,
         username,
       });
 
-      if (error) {
-        // Error from server action is a string
-        const errorMessage = typeof error === 'string' ? error : (error as any).message || 'Failed to update profile';
-        setUpdateMessage({ type: 'error', text: errorMessage });
+      if (result.error) {
+        setUpdateMessage({ type: 'error', text: result.error });
       } else {
         setUpdateMessage({ type: 'success', text: 'Profile updated successfully' });
       }
@@ -556,6 +555,7 @@ export default function AccountSettingsPage() {
     </div>
   );
 }
+
 
 
 
