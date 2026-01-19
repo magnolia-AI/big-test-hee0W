@@ -6,8 +6,8 @@ import { AuthProvider } from '@/components/auth-provider'
 import { AuthHeader } from '@/components/auth-header'
 
 export const metadata: Metadata = {
-  title: 'VY App',
-  description: 'My VY App',
+  title: 'Chirp',
+  description: 'A social platform for everyone',
   icons: {
     icon: '/favicon.ico',
   },
@@ -34,3 +34,4 @@ export default function RootLayout({
     </html>
   )
 }
+

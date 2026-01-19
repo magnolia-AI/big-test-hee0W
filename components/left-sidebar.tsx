@@ -38,7 +38,7 @@ export function LeftSidebar() {
       <div className="space-y-6">
         <div className="px-4 py-2">
           <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
-            Magnolia
+            Chirp
           </Link>
         </div>
 
@@ -96,7 +96,7 @@ export function LeftSidebar() {
           </DropdownMenu>
         ) : (
            <div className="space-y-2 p-4 bg-muted/50 rounded-xl">
-             <p className="font-bold">New to Magnolia?</p>
+             <p className="font-bold">New to Chirp?</p>
              <p className="text-sm text-muted-foreground mb-4">Sign up now to get your own personalized timeline!</p>
              <Button className="w-full rounded-full" asChild>
                <Link href="/auth/sign-up">Sign up</Link>
@@ -110,5 +110,7 @@ export function LeftSidebar() {
     </div>
   );
 }
+
+
 
 

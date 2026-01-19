@@ -10,7 +10,7 @@ export function RightSidebar() {
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input 
-          placeholder="Search Magnolia" 
+          placeholder="Search Chirp" 
           className="pl-10 rounded-full bg-muted border-none focus-visible:ring-1 focus-visible:ring-primary"
         />
       </div>
@@ -64,7 +64,7 @@ export function RightSidebar() {
       </Card>
 
       <div className="text-xs text-muted-foreground px-4 flex flex-wrap gap-2">
-        <span>&copy; 2026 Magnolia</span>
+        <span>&copy; 2026 Chirp</span>
         <span className="hover:underline cursor-pointer">Terms</span>
         <span className="hover:underline cursor-pointer">Privacy</span>
         <span className="hover:underline cursor-pointer">Cookies</span>
@@ -72,5 +72,7 @@ export function RightSidebar() {
     </div>
   );
 }
+
+
 
 
