@@ -136,7 +136,10 @@ export default function AccountSettingsPage() {
     if (user?.name) {
       setName(user.name);
     }
-  }, [user?.name]);
+    if (user?.username) {
+      setUsername(user.username);
+    }
+  }, [user?.name, user?.username]);
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -146,6 +149,7 @@ export default function AccountSettingsPage() {
     try {
       const { error } = await authClient.updateUser({
         name,
+        username,
       });
 
       if (error) {
@@ -534,3 +538,5 @@ export default function AccountSettingsPage() {
     </div>
   );
 }
+
+
