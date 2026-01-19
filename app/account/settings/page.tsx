@@ -155,12 +155,15 @@ export default function AccountSettingsPage() {
       });
 
       if (error) {
-        setUpdateMessage({ type: 'error', text: error.message || 'Failed to update profile' });
+        // Error from server action is a string
+        const errorMessage = typeof error === 'string' ? error : (error as any).message || 'Failed to update profile';
+        setUpdateMessage({ type: 'error', text: errorMessage });
       } else {
         setUpdateMessage({ type: 'success', text: 'Profile updated successfully' });
       }
-    } catch {
-      setUpdateMessage({ type: 'error', text: 'An unexpected error occurred' });
+    } catch (err) {
+      console.error('Profile update error:', err);
+      setUpdateMessage({ type: 'error', text: 'An unexpected error occurred. Please try again.' });
     } finally {
       setIsUpdating(false);
     }
@@ -553,6 +556,7 @@ export default function AccountSettingsPage() {
     </div>
   );
 }
+
 
 
 
