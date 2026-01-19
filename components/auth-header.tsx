@@ -24,14 +24,14 @@ export function AuthHeader() {
 
   if (isPending) {
     return (
-      <header className="flex justify-end items-center p-4 gap-4 h-16">
+      <header className="flex md:hidden justify-end items-center p-4 gap-4 h-16">
         <div className="h-9 w-9 rounded-full bg-muted animate-pulse" />
       </header>
     );
   }
 
   return (
-    <header className="flex justify-end items-center p-4 gap-4 h-16">
+    <header className="flex md:hidden justify-end items-center p-4 gap-4 h-16 border-b sticky top-0 bg-background/80 backdrop-blur z-20">
       {user ? (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -81,3 +81,4 @@ export function AuthHeader() {
     </header>
   );
 }
+

@@ -21,7 +21,8 @@ import { AlertCircle, CheckCircle2, Loader2, User, Shield, Mail, Hash, Calendar,
 
 export default function AccountSettingsPage() {
   const { data, isPending: isSessionPending } = authClient.useSession();
-  const user = data?.user;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const user = data?.user as any;
 
   const [name, setName] = useState('');
   const [username, setUsername] = useState('');
@@ -555,6 +556,7 @@ export default function AccountSettingsPage() {
     </div>
   );
 }
+
 
 
 
