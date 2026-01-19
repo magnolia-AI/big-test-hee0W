@@ -148,6 +148,14 @@ export async function getTweet(id: string): Promise<{ tweet: TweetWithAuthor, re
   const { data: session } = await authServer.getSession();
   const currentUserId = session?.user?.id;
 
+  // Validate UUID format to prevent DB errors
+  const uuidSchema = z.string().uuid();
+  const validatedId = uuidSchema.safeParse(id);
+  
+  if (!validatedId.success) {
+    return null;
+  }
+
   // 1. Fetch the main tweet
   const tweetMetadata = await db
     .select({
@@ -216,4 +224,5 @@ export async function getTweet(id: string): Promise<{ tweet: TweetWithAuthor, re
     replies: repliesData.map(formatTweet),
   };
 }
+
 
