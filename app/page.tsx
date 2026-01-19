@@ -1,28 +1,22 @@
-'use client'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { useToast } from "@/hooks/use-toast"
+import { getTweets } from '@/app/actions/tweets';
+import { Feed } from '@/components/feed';
+import { TweetComposer } from '@/components/tweet-composer';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
-{/* 
-  TEMPLATE PAGE: Home
-  This is a template home page.
-  Replace all content with content that suits the users request.
-*/}
-export default function Home() {
-  const { toast } = useToast()
+export default async function Home() {
+  const tweets = await getTweets();
+
   return (
-    <div className="min-h-full">
-
-      <section className="container mx-auto px-4 pt-24 pb-20">
-        <div className="max-w-[800px] mx-auto text-center">
-          <h1 className="text-5xl font-bold tracking-tight lg:text-6xl">
-            Template Starter
-          </h1>
-          <p className="mt-6 text-xl text-muted-foreground max-w-[600px] mx-auto">
-            This is a customizable template. Replace all content with your own using the chat interface.
-          </p>
-        </div>
-      </section>
+    <div className="container max-w-2xl mx-auto border-x min-h-[calc(100vh-4rem)]">
+      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b p-4">
+        <h1 className="text-xl font-bold">Home</h1>
+      </div>
+      
+      <TweetComposer />
+      
+      <Feed tweets={tweets} />
     </div>
-  )
+  );
 }
+
