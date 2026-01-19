@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { authClient } from '@/lib/auth/client';
+import { updateProfile } from '@/app/actions/profile';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -23,6 +24,7 @@ export default function AccountSettingsPage() {
   const user = data?.user;
 
   const [name, setName] = useState('');
+  const [username, setUsername] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateMessage, setUpdateMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   
@@ -227,6 +229,19 @@ export default function AccountSettingsPage() {
                       onChange={(e) => setName(e.target.value)}
                       placeholder="Enter your name"
                     />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="username">Username</Label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-2.5 text-muted-foreground">@</span>
+                      <Input
+                        id="username"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        placeholder="username"
+                        className="pl-7"
+                      />
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="email">Email Address</Label>
@@ -538,5 +553,8 @@ export default function AccountSettingsPage() {
     </div>
   );
 }
+
+
+
 
 

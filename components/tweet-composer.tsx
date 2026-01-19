@@ -17,6 +17,7 @@ interface TweetComposerProps {
 }
 
 export function TweetComposer({ parentId, placeholder = "What is happening?!", className }: TweetComposerProps) {
+  const router = useRouter();
   const { data: session } = authClient.useSession();
   const [state, action, isPending] = useActionState(createTweet, null);
   const formRef = useRef<HTMLFormElement>(null);
@@ -57,6 +58,7 @@ export function TweetComposer({ parentId, placeholder = "What is happening?!", c
     </div>
   );
 }
+
 
 
 
