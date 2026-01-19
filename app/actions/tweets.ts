@@ -108,7 +108,7 @@ export async function getTweets(): Promise<TweetWithAuthor[]> {
     .from(tweets)
     .innerJoin(users, eq(tweets.authorId, users.id))
     .leftJoin(likes, eq(tweets.id, likes.tweetId))
-    .where(eq(tweets.parentId, null)) // Only fetch top-level tweets for the feed
+    .where(isNull(tweets.parentId)) // Only fetch top-level tweets for the feed
     .groupBy(tweets.id, users.id)
     .orderBy(desc(tweets.createdAt))
     .limit(20);
@@ -224,5 +224,6 @@ export async function getTweet(id: string): Promise<{ tweet: TweetWithAuthor, re
     replies: repliesData.map(formatTweet),
   };
 }
+
 
 
