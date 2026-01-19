@@ -35,7 +35,8 @@ export async function createTweet(prevState: any, formData: FormData) {
   }
 
   const content = formData.get('content') as string;
-  const parentId = formData.get('parentId') as string;
+  const rawParentId = formData.get('parentId');
+  const parentId = rawParentId ? String(rawParentId) : undefined;
   
   const validated = createTweetSchema.safeParse({ content, parentId });
 
@@ -224,6 +225,7 @@ export async function getTweet(id: string): Promise<{ tweet: TweetWithAuthor, re
     replies: repliesData.map(formatTweet),
   };
 }
+
 
 
 

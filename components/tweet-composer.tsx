@@ -25,6 +25,7 @@ export function TweetComposer({ parentId, placeholder = "What is happening?!", c
     if (state?.success) {
       formRef.current?.reset();
       toast.success(parentId ? 'Reply posted!' : 'Tweet posted!');
+      router.refresh();
     } else if (state?.error) {
       toast.error(state.error);
     }
@@ -56,5 +57,6 @@ export function TweetComposer({ parentId, placeholder = "What is happening?!", c
     </div>
   );
 }
+
 
 
