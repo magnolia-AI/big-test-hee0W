@@ -3,7 +3,7 @@
 import { authServer } from '@/lib/auth/server';
 import db from '@/lib/db';
 import { tweets, users, likes } from '@/lib/schema';
-import { desc, eq, and, sql } from 'drizzle-orm';
+import { desc, eq, and, sql, isNull } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 
@@ -224,6 +224,7 @@ export async function getTweet(id: string): Promise<{ tweet: TweetWithAuthor, re
     replies: repliesData.map(formatTweet),
   };
 }
+
 
 
 
