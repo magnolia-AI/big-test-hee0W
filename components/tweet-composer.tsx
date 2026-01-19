@@ -1,6 +1,7 @@
 'use client';
 
 import { useActionState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { createTweet } from '@/app/actions/tweets';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -30,7 +31,7 @@ export function TweetComposer({ parentId, placeholder = "What is happening?!", c
     } else if (state?.error) {
       toast.error(state.error);
     }
-  }, [state, parentId]);
+  }, [state, parentId, router]);
 
   if (!session?.user) return null;
 
@@ -58,6 +59,8 @@ export function TweetComposer({ parentId, placeholder = "What is happening?!", c
     </div>
   );
 }
+
+
 
 
 
