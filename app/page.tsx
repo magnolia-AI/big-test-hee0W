@@ -1,21 +1,13 @@
 import { getTweets } from '@/app/actions/tweets';
 import { Feed } from '@/components/feed';
 import { TweetComposer } from '@/components/tweet-composer';
-import { LeftSidebar } from '@/components/left-sidebar';
 import { RightSidebar } from '@/components/right-sidebar';
-import { authClient } from '@/lib/auth/client'; // This is client side only? 
-// Wait, authClient is usually client side. 
-// app/page.tsx is server side.
-// I can't check session with authClient here easily unless I use headers() or auth server lib.
-// But TweetComposer checks session internally.
-// LeftSidebar checks session internally.
 
 export default async function Home() {
   const tweets = await getTweets();
 
   return (
     <div className="container mx-auto max-w-7xl min-h-screen flex justify-center lg:gap-8">
-      <LeftSidebar />
       
       <main className="flex-1 max-w-2xl w-full border-x min-h-screen pb-20 md:pb-0">
         <div className="sticky top-0 z-10 bg-background/85 backdrop-blur-md border-b px-4 py-3 flex items-center justify-between">
@@ -32,4 +24,5 @@ export default async function Home() {
     </div>
   );
 }
+
 
