@@ -78,9 +78,9 @@ export function AppSidebar() {
           })}
         </SidebarMenu>
 
-        <div className="px-2 mt-4">
+        <div className={cn("px-2 mt-4", isCollapsed && "px-0 flex justify-center")}>
             {isCollapsed ? (
-                 <Button className="w-full rounded-full h-12 w-12 p-0 aspect-square shadow-lg" size="icon">
+                 <Button className="rounded-full h-10 w-10 p-0 aspect-square shadow-lg" size="icon">
                     <PenLine className="h-5 w-5" />
                  </Button>
             ) : (
@@ -92,16 +92,19 @@ export function AppSidebar() {
         </div>
       </SidebarContent>
 
-      <SidebarFooter className="p-4">
+      <SidebarFooter className={cn("p-4", isCollapsed && "p-1")}>
         {user ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <SidebarMenuButton
                 size="lg"
-                className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground rounded-full h-auto py-2"
+                className={cn(
+                    "data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground rounded-full h-auto py-2",
+                    isCollapsed && "py-0 justify-center h-10 w-10"
+                )}
               >
-                <div className="flex items-center gap-3 text-left w-full">
-                  <Avatar className="h-10 w-10">
+                <div className={cn("flex items-center gap-3 text-left w-full", isCollapsed && "justify-center")}>
+                  <Avatar className={cn("h-10 w-10", isCollapsed && "h-8 w-8")}>
                     <AvatarImage src={user.image || ''} />
                     <AvatarFallback>{user.name?.[0]}</AvatarFallback>
                   </Avatar>
@@ -135,6 +138,9 @@ export function AppSidebar() {
     </Sidebar>
   );
 }
+
+
+
 
 
 
