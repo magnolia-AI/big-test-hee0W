@@ -32,25 +32,19 @@ export function AppSidebar({ user: initialUser }: { user?: any }) {
   const pathname = usePathname();
   const { data: session } = authClient.useSession();
   
-  // Database user profile state
   const [dbUser, setDbUser] = useState<any>(null);
-  
-  // Combine session user with DB user, prioritizing DB user for display fields
   const authUser = session?.user || initialUser;
   const displayUser = dbUser ? { ...authUser, ...dbUser } : authUser;
   
   const { state } = useSidebar();
   const isCollapsed = state === 'collapsed';
 
-  // Fetch updated profile from DB on mount and when session changes
   useEffect(() => {
     async function fetchDBProfile() {
       if (authUser?.id) {
         try {
           const profile = await getProfile();
-          if (profile) {
-            setDbUser(profile);
-          }
+          if (profile) setDbUser(profile);
         } catch (error) {
           console.error('Failed to fetch sidebar profile:', error);
         }
@@ -64,38 +58,28 @@ export function AppSidebar({ user: initialUser }: { user?: any }) {
     window.location.href = '/';
   };
 
-  const handlePostClick = () => {
-    const composer = document.getElementById('main-tweet-composer');
-    if (composer) {
-      composer.focus();
-      composer.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  };
-
   const navItems = [
-    { icon: Home, label: 'Home', href: '/' },
-    { icon: Search, label: 'Explore', href: '/explore' },
-    { icon: Bell, label: 'Notifications', href: '/notifications' },
-    { icon: Mail, label: 'Messages', href: '/messages' },
-    { icon: User, label: 'Profile', href: displayUser ? `/profile/${displayUser.id}` : '/auth/sign-in' },
-    { icon: Settings, label: 'Settings', href: '/account/settings' },
+    { icon: Home, label: 'Discourse', href: '/' },
+    { icon: Search, label: 'Search', href: '/explore' },
+    { icon: Bell, label: 'Signals', href: '/notifications' },
+    { icon: Mail, label: 'Letters', href: '/messages' },
+    { icon: User, label: 'Journal', href: displayUser ? `/profile/${displayUser.id}` : '/auth/sign-in' },
+    { icon: Settings, label: 'System', href: '/account/settings' },
   ];
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-border">
-      <SidebarHeader className="h-20 flex-row items-center justify-between px-4">
+    <Sidebar collapsible="icon" className="border-r border-border bg-background">
+      <SidebarHeader className="h-24 flex-row items-center px-6">
         <Link href="/" className={cn("flex items-center gap-2 group transition-all", isCollapsed && "hidden")}>
-          <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-tr from-primary to-purple-600 shadow-md shadow-primary/20 group-hover:scale-105 transition-transform">
-            <Bird className="h-6 w-6 text-white" />
-          </div>
-          <span className="text-2xl font-black tracking-tighter bg-gradient-to-r from-primary via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+          <Bird className="h-8 w-8 text-primary" />
+          <span className="logo-text text-3xl">
             Chirp
           </span>
         </Link>
-        <SidebarTrigger className={cn(isCollapsed && "mx-auto")} />
+        <SidebarTrigger className={cn("ml-auto", isCollapsed && "mx-auto")} />
       </SidebarHeader>
 
-      <SidebarContent className="px-2 gap-4">
+      <SidebarContent className="px-4 gap-2">
         <SidebarMenu>
           {navItems.map((item) => {
             const isActive = pathname === item.href;
@@ -105,10 +89,13 @@ export function AppSidebar({ user: initialUser }: { user?: any }) {
                   asChild
                   isActive={isActive}
                   tooltip={item.label}
-                  className="h-12 text-lg rounded-full px-4 data-[active=true]:font-bold data-[active=true]:bg-accent"
+                  className={cn(
+                    "h-12 text-lg px-4 transition-all duration-200 uppercase tracking-widest font-heading rounded-none border-l-2 border-transparent",
+                    isActive ? "border-primary text-primary bg-accent/10 font-black italic" : "hover:border-primary/30 hover:bg-transparent"
+                  )}
                 >
                   <Link href={item.href}>
-                    <item.icon className={cn("h-6 w-6", isActive && "stroke-[3px]")} />
+                    <item.icon className={cn("h-5 w-5 mr-3", isActive && "text-primary")} />
                     <span>{item.label}</span>
                   </Link>
                 </SidebarMenuButton>
@@ -117,57 +104,52 @@ export function AppSidebar({ user: initialUser }: { user?: any }) {
           })}
         </SidebarMenu>
 
-        <div className={cn("px-2 mt-4", isCollapsed && "px-0 flex justify-center")}>
-            {isCollapsed ? (
-                 <Button onClick={handlePostClick} className="rounded-full h-10 w-10 p-0 aspect-square shadow-lg" size="icon">
-                    <PenLine className="h-5 w-5" />
-                 </Button>
-            ) : (
-                <Button onClick={handlePostClick} className="w-full rounded-full h-12 text-lg font-bold shadow-lg" size="lg">
-                    <PenLine className="mr-2 h-5 w-5" />
-                    Post
-                </Button>
-            )}
+        <div className={cn("mt-8", isCollapsed && "flex justify-center")}>
+            <Button 
+              className="w-full rounded-none h-14 text-sm font-bold uppercase tracking-[0.2em] shadow-none bg-primary text-primary-foreground hover:bg-primary/90 transition-transform active:scale-95"
+              size={isCollapsed ? "icon" : "lg"}
+            >
+                {isCollapsed ? <PenLine className="h-5 w-5" /> : "Post Thread"}
+            </Button>
         </div>
       </SidebarContent>
 
-      <SidebarFooter className={cn("p-4", isCollapsed && "p-1")}>
+      <SidebarFooter className={cn("p-6", isCollapsed && "p-2")}>
         {displayUser ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <SidebarMenuButton
                 size="lg"
                 className={cn(
-                    "data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground rounded-full h-auto py-2",
-                    isCollapsed && "py-0 justify-center h-10 w-10"
+                    "hover:bg-accent/10 rounded-none h-auto py-3 border border-transparent hover:border-border transition-all",
+                    isCollapsed && "py-0 justify-center h-12 w-12"
                 )}
               >
-                <div className={cn("flex items-center gap-3 text-left w-full", isCollapsed && "justify-center")}>
-                  <Avatar className={cn("h-10 w-10", isCollapsed && "h-8 w-8")}>
-                    <AvatarImage src={displayUser.image || ''} />
-                    <AvatarFallback>{displayUser.name?.[0]}</AvatarFallback>
+                <div className={cn("flex items-center gap-4 text-left w-full", isCollapsed && "justify-center")}>
+                  <Avatar className={cn("h-10 w-10 grayscale rounded-none border border-border", isCollapsed && "h-8 w-8")}>
+                    <AvatarImage src={displayUser.image || ''} className="object-cover" />
+                    <AvatarFallback className="rounded-none">{displayUser.name?.[0]}</AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col flex-1 overflow-hidden transition-all group-data-[collapsible=icon]:hidden">
-                    <span className="font-bold truncate">{displayUser.name}</span>
-                    <span className="text-xs text-muted-foreground truncate">@{displayUser.username || 'user'}</span>
+                    <span className="font-heading italic uppercase text-xs tracking-wider truncate">{displayUser.name}</span>
+                    <span className="text-[10px] uppercase tracking-widest text-muted-foreground truncate">@{displayUser.username || 'user'}</span>
                   </div>
                 </div>
               </SidebarMenuButton>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56" side="right">
-              <DropdownMenuItem onClick={handleSignOut} className="text-destructive cursor-pointer">
+            <DropdownMenuContent align="end" className="w-56 rounded-none border-border" side="right">
+              <DropdownMenuItem onClick={handleSignOut} className="text-destructive cursor-pointer uppercase text-xs tracking-widest font-bold">
                 <LogOut className="mr-2 h-4 w-4" />
-                Sign out
+                Discard Session
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
              !isCollapsed && (
-                 <div className="space-y-2 p-4 bg-muted/50 rounded-xl group-data-[collapsible=icon]:hidden">
-                    <p className="font-bold">New to Chirp?</p>
-                    <p className="text-sm text-muted-foreground mb-4">Sign up now!</p>
-                    <Button className="w-full rounded-full" asChild>
-                    <Link href="/auth/sign-up">Sign up</Link>
+                 <div className="space-y-4 p-6 border border-border rounded-none bg-secondary/50">
+                    <p className="font-heading uppercase text-xs tracking-[0.2em] opacity-50">Join the discourse</p>
+                    <Button className="w-full rounded-none uppercase text-xs tracking-widest h-10" asChild>
+                      <Link href="/auth/sign-up">Enroll</Link>
                     </Button>
                  </div>
              )
@@ -177,6 +159,4 @@ export function AppSidebar({ user: initialUser }: { user?: any }) {
     </Sidebar>
   );
 }
-
-
 
