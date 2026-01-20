@@ -1,6 +1,5 @@
 import './globals.css'
 import type { Metadata } from 'next'
-import { headers } from 'next/headers'
 import { Toaster } from "@/components/ui/toaster"
 import { ThemeProvider } from '@/components/theme-provider'
 import { AuthProvider } from '@/components/auth-provider'
@@ -21,10 +20,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  const headersList = await headers();
-  const session = await authServer.api.getSession({
-    headers: headersList,
-  });
+  const { data: session } = await authServer.getSession();
 
   return (
     <html lang="en" className="h-full" suppressHydrationWarning>
@@ -50,6 +46,8 @@ export default async function RootLayout({
     </html>
   )
 }
+
+
 
 
 
