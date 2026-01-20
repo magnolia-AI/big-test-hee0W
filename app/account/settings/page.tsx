@@ -1,143 +1,26 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { authClient } from '@/lib/auth/client';
-import { updateProfile, getProfile } from '@/app/actions/profile';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { AlertCircle, CheckCircle2, Loader2, User, Shield, Mail, Hash, Calendar, Trash2, AlertTriangle } from 'lucide-react';
+import { authClient } from '@/lib/auth/client';
+import { Loader2, User, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { getProfile, updateProfile } from '@/app/actions/profile';
 
-export default function AccountSettingsPage() {
-  const { data, isPending: isSessionPending } = authClient.useSession();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const user = data?.user as any;
-
-  // Database user profile
-  const [dbUser, setDbUser] = useState<any>(null);
-  const [isProfileLoading, setIsProfileLoading] = useState(true);
+export default function SettingsPage() {
+  const { data: session, isPending: isSessionPending } = authClient.useSession();
+  const user = session?.user;
 
   const [name, setName] = useState('');
   const [username, setUsername] = useState('');
+  const [dbUser, setDbUser] = useState<any>(null);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isProfileLoading, setIsProfileLoading] = useState(false);
   const [updateMessage, setUpdateMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  
-  // Verification dialog state
-  const [verifyDialogOpen, setVerifyDialogOpen] = useState(false);
-  const [verificationStep, setVerificationStep] = useState<'send' | 'verify'>('send');
-  const [isSendingVerification, setIsSendingVerification] = useState(false);
-  const [verificationMessage, setVerificationMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  const [otpCode, setOtpCode] = useState('');
-  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
-
-  // Delete account dialog state
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [deleteConfirmText, setDeleteConfirmText] = useState('');
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
-
-  const resetVerificationDialog = () => {
-    setVerificationStep('send');
-    setVerificationMessage(null);
-    setOtpCode('');
-  };
-
-  const handleOpenVerifyDialog = () => {
-    resetVerificationDialog();
-    setVerifyDialogOpen(true);
-  };
-
-  const handleSendVerificationEmail = async () => {
-    if (!user?.email) return;
-    
-    setIsSendingVerification(true);
-    setVerificationMessage(null);
-
-    try {
-      const { error } = await authClient.emailOtp.sendVerificationOtp({
-        email: user.email,
-        type: 'email-verification',
-      });
-
-      if (error) {
-        setVerificationMessage({ type: 'error', text: error.message || 'Failed to send verification email' });
-      } else {
-        setVerificationMessage({ type: 'success', text: 'Code sent! Check your inbox.' });
-        setVerificationStep('verify');
-      }
-    } catch {
-      setVerificationMessage({ type: 'error', text: 'An unexpected error occurred' });
-    } finally {
-      setIsSendingVerification(false);
-    }
-  };
-
-  const handleVerifyOtp = async () => {
-    if (!otpCode.trim() || !user?.email) {
-      setVerificationMessage({ type: 'error', text: 'Please enter the verification code' });
-      return;
-    }
-
-    setIsVerifyingOtp(true);
-    setVerificationMessage(null);
-
-    try {
-      const { error } = await authClient.emailOtp.verifyEmail({
-        email: user.email,
-        otp: otpCode.trim(),
-      });
-
-      if (error) {
-        setVerificationMessage({ type: 'error', text: error.message || 'Invalid verification code' });
-      } else {
-        setVerificationMessage({ type: 'success', text: 'Email verified successfully!' });
-        setTimeout(() => {
-          setVerifyDialogOpen(false);
-          window.location.reload();
-        }, 1500);
-      }
-    } catch {
-      setVerificationMessage({ type: 'error', text: 'An unexpected error occurred' });
-    } finally {
-      setIsVerifyingOtp(false);
-    }
-  };
-
-  const handleDeleteAccount = async () => {
-    if (deleteConfirmText !== 'DELETE') {
-      setDeleteError('Please type DELETE to confirm');
-      return;
-    }
-
-    setIsDeleting(true);
-    setDeleteError(null);
-
-    try {
-      const { error } = await authClient.deleteUser();
-
-      if (error) {
-        setDeleteError(error.message || 'Failed to delete account');
-      } else {
-        // Redirect to home after successful deletion
-        window.location.href = '/';
-      }
-    } catch {
-      setDeleteError('An unexpected error occurred');
-    } finally {
-      setIsDeleting(false);
-    }
-  };
 
   // Fetch profile data from database
   useEffect(() => {
@@ -164,7 +47,6 @@ export default function AccountSettingsPage() {
     setUpdateMessage(null);
 
     try {
-      // Use the server action to update the public profile (DB)
       const result = await updateProfile({
         name,
         username,
@@ -173,8 +55,7 @@ export default function AccountSettingsPage() {
       if (result.error) {
         setUpdateMessage({ type: 'error', text: result.error });
       } else {
-        setUpdateMessage({ type: 'success', text: 'Profile updated successfully' });
-        // Re-fetch profile data to reflect changes
+        setUpdateMessage({ type: 'success', text: 'Signal updated. Re-broadcasting profile.' });
         const updatedProfile = await getProfile();
         setDbUser(updatedProfile);
         if (updatedProfile?.name) setName(updatedProfile.name);
@@ -191,7 +72,7 @@ export default function AccountSettingsPage() {
   if (isSessionPending || isProfileLoading) {
     return (
       <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -199,10 +80,10 @@ export default function AccountSettingsPage() {
   if (!user) {
     return (
       <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center p-4">
-        <Card className="w-full max-w-md">
+        <Card className="w-full max-w-md rounded-none border-2 border-primary shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
           <CardContent className="pt-6">
-            <p className="text-center text-muted-foreground">
-              You need to be signed in to access this page.
+            <p className="text-center font-heading font-black uppercase italic tracking-tighter">
+              Identity required for discourse.
             </p>
           </CardContent>
         </Card>
@@ -211,356 +92,102 @@ export default function AccountSettingsPage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-muted/30">
-      <div className="container max-w-4xl mx-auto py-10 px-4">
-        <div className="space-y-1 mb-8">
-          <h1 className="text-3xl font-bold tracking-tight">Account Settings</h1>
-          <p className="text-muted-foreground">Manage your account settings and profile information</p>
+    <div className="min-h-screen bg-background">
+      <div className="container max-w-4xl mx-auto py-12 px-6">
+        <div className="space-y-2 mb-12 border-l-4 border-primary pl-6">
+          <h1 className="text-5xl font-heading font-black uppercase tracking-tighter italic leading-none">Perspective Control</h1>
+          <p className="text-muted-foreground uppercase tracking-widest text-xs">Curate your digital signal and editorial presence.</p>
         </div>
 
-        <div className="grid gap-6">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <User className="h-5 w-5 text-muted-foreground" />
+        <div className="grid gap-12">
+          <Card className="rounded-none border-0 shadow-none bg-transparent">
+            <CardHeader className="px-0">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-primary text-primary-foreground transform -rotate-12">
+                  <User className="h-5 w-5" />
+                </div>
                 <div>
-                  <CardTitle>Profile Information</CardTitle>
-                  <CardDescription>Update your personal details</CardDescription>
+                  <CardTitle className="font-heading font-black text-2xl uppercase tracking-tight">Identity Details</CardTitle>
+                  <CardDescription className="uppercase text-[10px] tracking-[0.2em] font-bold opacity-60">Your signal signature</CardDescription>
                 </div>
               </div>
             </CardHeader>
-            <Separator />
-            <CardContent className="pt-6">
-              <form onSubmit={handleUpdateProfile} className="space-y-6">
+            <CardContent className="px-0 pt-8 border-t-2 border-primary">
+              <form onSubmit={handleUpdateProfile} className="space-y-8">
                 {updateMessage && (
-                  <Alert variant={updateMessage.type === 'error' ? 'destructive' : 'default'} className={updateMessage.type === 'success' ? 'border-green-500 text-green-700 dark:text-green-400' : ''}>
-                    {updateMessage.type === 'error' ? (
-                      <AlertCircle className="h-4 w-4" />
-                    ) : (
-                      <CheckCircle2 className="h-4 w-4 text-green-500" />
-                    )}
+                  <Alert variant={updateMessage.type === 'error' ? 'destructive' : 'default'} className={cn(
+                    "rounded-none border-2 font-bold",
+                    updateMessage.type === 'success' ? 'border-accent bg-accent/20 text-primary uppercase text-xs tracking-wider' : 'border-destructive'
+                  )}>
+                    {updateMessage.type === 'error' ? <AlertCircle className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
                     <AlertDescription>{updateMessage.text}</AlertDescription>
                   </Alert>
                 )}
-                <div className="grid gap-6 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Display Name</Label>
+                
+                <div className="grid gap-10 sm:grid-cols-2">
+                  <div className="space-y-3">
+                    <Label htmlFor="name" className="uppercase font-black text-xs tracking-widest opacity-70">Editorial Name</Label>
                     <Input
                       id="name"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      placeholder="Enter your name"
+                      placeholder="Your name"
+                      className="rounded-none border-x-0 border-t-0 border-b-2 border-primary focus-visible:ring-0 focus-visible:border-accent bg-secondary/30 h-12 text-lg font-heading"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="username">Username</Label>
+                  <div className="space-y-3">
+                    <Label htmlFor="username" className="uppercase font-black text-xs tracking-widest opacity-70">Handle</Label>
                     <div className="relative">
-                      <span className="absolute left-3 top-2.5 text-muted-foreground">@</span>
+                      <span className="absolute left-0 top-3 font-mono text-muted-foreground">@</span>
                       <Input
                         id="username"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         placeholder="username"
-                        className="pl-7"
+                        className="rounded-none border-x-0 border-t-0 border-b-2 border-primary focus-visible:ring-0 focus-visible:border-accent bg-secondary/30 pl-6 h-12 text-lg font-mono"
                       />
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email Address</Label>
+                  <div className="space-y-3 sm:col-span-2">
+                    <Label htmlFor="email" className="uppercase font-black text-xs tracking-widest opacity-70">Broadcast Channel</Label>
                     <Input
                       id="email"
                       value={user.email || ''}
                       disabled
-                      className="bg-muted"
+                      className="rounded-none border-0 bg-secondary/50 h-10 italic opacity-50 cursor-not-allowed"
                     />
-                    <p className="text-xs text-muted-foreground">
-                      Contact support to change your email
+                    <p className="text-[10px] uppercase font-bold tracking-[0.1em] text-muted-foreground/60">
+                      Channel modifications restricted to administration.
                     </p>
                   </div>
                 </div>
-                <div className="flex justify-end">
-                  <Button type="submit" disabled={isUpdating}>
+
+                <div className="flex justify-start">
+                  <Button 
+                    type="submit" 
+                    disabled={isUpdating}
+                    className="rounded-none px-12 h-14 uppercase font-heading font-black tracking-[0.2em] transform hover:-translate-y-1 hover:translate-x-1 shadow-[-4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[-4px_4px_0px_0px_rgba(255,255,255,1)] hover:shadow-none transition-all"
+                  >
                     {isUpdating ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Saving...
+                        Syncing...
                       </>
                     ) : (
-                      'Save changes'
+                      'Broadcasting Changes'
                     )}
                   </Button>
                 </div>
               </form>
             </CardContent>
           </Card>
-
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Shield className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <CardTitle>Account Details</CardTitle>
-                  <CardDescription>Your account information and status</CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <Separator />
-            <CardContent className="pt-6">
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {/* User ID */}
-                <div className="rounded-lg border bg-card p-4 space-y-2">
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Hash className="h-4 w-4" />
-                    <span className="text-xs font-medium uppercase tracking-wide">User ID</span>
-                  </div>
-                  <p className="font-mono text-sm truncate" title={user.id}>
-                    {user.id}
-                  </p>
-                </div>
-
-                {/* Account Created */}
-                <div className="rounded-lg border bg-card p-4 space-y-2">
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Calendar className="h-4 w-4" />
-                    <span className="text-xs font-medium uppercase tracking-wide">Member Since</span>
-                  </div>
-                  <p className="text-sm font-medium">
-                    {user.createdAt 
-                      ? new Date(user.createdAt).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric'
-                        })
-                      : 'N/A'
-                    }
-                  </p>
-                </div>
-
-                {/* Email Verification Status */}
-                <div className={`rounded-lg border p-4 space-y-3 ${user.emailVerified ? 'bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-900' : 'bg-amber-50 border-amber-200 dark:bg-amber-950/20 dark:border-amber-900'}`}>
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Mail className="h-4 w-4" />
-                    <span className="text-xs font-medium uppercase tracking-wide">Email Status</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {user.emailVerified ? (
-                      <>
-                        <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
-                        <span className="text-sm font-medium text-green-700 dark:text-green-300">Verified</span>
-                      </>
-                    ) : (
-                      <>
-                        <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-                        <span className="text-sm font-medium text-amber-700 dark:text-amber-300">Not verified</span>
-                      </>
-                    )}
-                  </div>
-                  {!user.emailVerified && (
-                    <Button 
-                      variant="secondary"
-                      size="sm" 
-                      onClick={handleOpenVerifyDialog}
-                      className="w-full"
-                    >
-                      <Mail className="mr-2 h-3 w-3" />
-                      Verify now
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Danger Zone */}
-          <Card className="border-red-200 dark:border-red-900">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-red-500" />
-                <div>
-                  <CardTitle className="text-red-600 dark:text-red-400">Danger Zone</CardTitle>
-                  <CardDescription>Irreversible and destructive actions</CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <Separator className="bg-red-200 dark:bg-red-900" />
-            <CardContent className="pt-6">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 rounded-lg border border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/20">
-                <div className="space-y-1">
-                  <p className="font-medium text-red-900 dark:text-red-200">Delete Account</p>
-                  <p className="text-sm text-red-700/90 dark:text-red-300/80">
-                    Permanently delete your account and all associated data. This action cannot be undone.
-                  </p>
-                </div>
-                <Button 
-                  variant="destructive" 
-                  onClick={() => {
-                    setDeleteConfirmText('');
-                    setDeleteError(null);
-                    setDeleteDialogOpen(true);
-                  }}
-                  className="shrink-0"
-                >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete Account
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </div>
-
-      {/* Email Verification Dialog */}
-      <Dialog open={verifyDialogOpen} onOpenChange={setVerifyDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Mail className="h-5 w-5" />
-              Verify your email
-            </DialogTitle>
-            <DialogDescription>
-              {verificationStep === 'send' 
-                ? `We'll send a verification code to ${user.email}`
-                : `Enter the 6-digit code sent to ${user.email}`
-              }
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 py-4">
-            {verificationMessage && (
-              <Alert variant={verificationMessage.type === 'error' ? 'destructive' : 'default'} className={verificationMessage.type === 'success' ? 'border-green-500 text-green-700 dark:text-green-400' : ''}>
-                {verificationMessage.type === 'error' ? (
-                  <AlertCircle className="h-4 w-4" />
-                ) : (
-                  <CheckCircle2 className="h-4 w-4 text-green-500" />
-                )}
-                <AlertDescription>{verificationMessage.text}</AlertDescription>
-              </Alert>
-            )}
-
-            {verificationStep === 'verify' && (
-              <div className="space-y-2">
-                <Label htmlFor="otp">Verification Code</Label>
-                <Input
-                  id="otp"
-                  type="text"
-                  placeholder="Enter 6-digit code"
-                  value={otpCode}
-                  onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  className="text-center text-lg tracking-widest"
-                  maxLength={6}
-                  autoFocus
-                />
-              </div>
-            )}
-          </div>
-
-          <DialogFooter className="flex-col sm:flex-row gap-2">
-            {verificationStep === 'send' ? (
-              <Button 
-                onClick={handleSendVerificationEmail} 
-                disabled={isSendingVerification}
-                className="w-full sm:w-auto"
-              >
-                {isSendingVerification ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Sending...
-                  </>
-                ) : (
-                  'Send verification code'
-                )}
-              </Button>
-            ) : (
-              <>
-                <Button
-                  variant="ghost"
-                  onClick={handleSendVerificationEmail}
-                  disabled={isSendingVerification}
-                  className="w-full sm:w-auto"
-                >
-                  {isSendingVerification ? 'Sending...' : 'Resend code'}
-                </Button>
-                <Button 
-                  onClick={handleVerifyOtp}
-                  disabled={isVerifyingOtp || otpCode.length < 6}
-                  className="w-full sm:w-auto"
-                >
-                  {isVerifyingOtp ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Verifying...
-                    </>
-                  ) : (
-                    'Verify'
-                  )}
-                </Button>
-              </>
-            )}
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Delete Account Confirmation Dialog */}
-      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-destructive">
-              <AlertTriangle className="h-5 w-5" />
-              Delete Account
-            </DialogTitle>
-            <DialogDescription>
-              This is a permanent action that cannot be undone. All your posts, profile info, and data will be permanently removed.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 py-4">
-            {deleteError && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{deleteError}</AlertDescription>
-              </Alert>
-            )}
-
-            <div className="space-y-2">
-              <Label htmlFor="confirm-delete">
-                Type <span className="font-bold">DELETE</span> to confirm
-              </Label>
-              <Input
-                id="confirm-delete"
-                placeholder="DELETE"
-                value={deleteConfirmText}
-                onChange={(e) => setDeleteConfirmText(e.target.value)}
-                autoFocus
-              />
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setDeleteDialogOpen(false)}
-              disabled={isDeleting}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDeleteAccount}
-              disabled={isDeleting || deleteConfirmText !== 'DELETE'}
-            >
-              {isDeleting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
-                </>
-              ) : (
-                'Delete Permanently'
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
+}
+
+function cn(...inputs: any[]) {
+  return inputs.filter(Boolean).join(' ');
 }
 

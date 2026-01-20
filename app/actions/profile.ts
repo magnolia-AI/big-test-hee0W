@@ -72,9 +72,10 @@ export async function updateProfile(data: { name: string; username: string }) {
       .set(updateData)
       .where(eq(users.id, session.user.id));
 
-    revalidatePath('/');
-    revalidatePath('/account/settings');
-    return { success: true };
+  revalidatePath('/');
+  revalidatePath('/account/settings');
+  revalidatePath(`/profile/${session.user.id}`);
+  return { success: true, message: 'Identity re-calibrated. New signal is live.' };
   } catch (error: any) {
     console.error('Failed to update profile:', error);
     if (error.code === '23505') { // Postgres unique constraint violation
@@ -83,4 +84,5 @@ export async function updateProfile(data: { name: string; username: string }) {
     return { error: 'Failed to update profile. Please try again.' };
   }
 }
+
 
