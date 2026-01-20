@@ -26,10 +26,10 @@ import { Button } from '@/components/ui/button';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
-export function AppSidebar() {
+export function AppSidebar({ user: initialUser }: { user?: any }) {
   const pathname = usePathname();
   const { data: session } = authClient.useSession();
-  const user = session?.user;
+  const user = session?.user || initialUser;
   const { state } = useSidebar();
   const isCollapsed = state === 'collapsed';
 
@@ -138,6 +138,7 @@ export function AppSidebar() {
     </Sidebar>
   );
 }
+
 
 
 

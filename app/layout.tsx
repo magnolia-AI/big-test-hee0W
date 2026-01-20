@@ -1,10 +1,12 @@
 import './globals.css'
 import type { Metadata } from 'next'
+import { headers } from 'next/headers'
 import { Toaster } from "@/components/ui/toaster"
 import { ThemeProvider } from '@/components/theme-provider'
 import { AuthProvider } from '@/components/auth-provider'
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar'
 import { AppSidebar } from '@/components/app-sidebar'
+import { authServer } from '@/lib/auth/server'
 
 export const metadata: Metadata = {
   title: 'Chirp',
@@ -14,18 +16,23 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const headersList = await headers();
+  const session = await authServer.api.getSession({
+    headers: headersList,
+  });
+
   return (
     <html lang="en" className="h-full" suppressHydrationWarning>
       <body className="h-full flex flex-col antialiased">
         <ThemeProvider defaultTheme="light" attribute="class">
           <AuthProvider>
             <SidebarProvider defaultOpen={true}>
-              <AppSidebar />
+              <AppSidebar user={session?.user} />
               <SidebarInset>
                 <header className="flex items-center h-14 px-4 border-b md:hidden">
                   <SidebarTrigger />
@@ -43,6 +50,7 @@ export default function RootLayout({
     </html>
   )
 }
+
 
 
 
