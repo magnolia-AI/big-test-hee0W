@@ -16,6 +16,28 @@ const updateProfileSchema = z.object({
     .or(z.literal('')),
 });
 
+
+export async function getProfile() {
+  const { data: session } = await authServer.getSession();
+  if (!session?.user) {
+    return null;
+  }
+
+  const user = await db
+    .select({
+      id: users.id,
+      name: users.name,
+      username: users.username,
+      bio: users.bio,
+    })
+    .from(users)
+    .where(eq(users.id, session.user.id))
+    .limit(1)
+    .then(res => res[0]);
+
+  return user;
+}
+
 export async function updateProfile(data: { name: string; username: string }) {
   const { data: session } = await authServer.getSession();
   if (!session?.user) {

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { authClient } from '@/lib/auth/client';
-import { updateProfile } from '@/app/actions/profile';
+import { updateProfile, getProfile } from '@/app/actions/profile';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -23,6 +23,10 @@ export default function AccountSettingsPage() {
   const { data, isPending: isSessionPending } = authClient.useSession();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const user = data?.user as any;
+
+  // Database user profile
+  const [dbUser, setDbUser] = useState<any>(null);
+  const [isProfileLoading, setIsProfileLoading] = useState(true);
 
   const [name, setName] = useState('');
   const [username, setUsername] = useState('');
@@ -135,14 +139,24 @@ export default function AccountSettingsPage() {
     }
   };
 
+  // Fetch profile data from database
   useEffect(() => {
-    if (user?.name) {
-      setName(user.name);
-    }
-    if (user?.username) {
-      setUsername(user.username);
-    }
-  }, [user?.name, user?.username]);
+    const fetchProfile = async () => {
+      setIsProfileLoading(true);
+      try {
+        const profile = await getProfile();
+        setDbUser(profile);
+        if (profile?.name) setName(profile.name);
+        if (profile?.username) setUsername(profile.username || '');
+      } catch (error) {
+        console.error('Failed to fetch profile:', error);
+      } finally {
+        setIsProfileLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -160,6 +174,11 @@ export default function AccountSettingsPage() {
         setUpdateMessage({ type: 'error', text: result.error });
       } else {
         setUpdateMessage({ type: 'success', text: 'Profile updated successfully' });
+        // Re-fetch profile data to reflect changes
+        const updatedProfile = await getProfile();
+        setDbUser(updatedProfile);
+        if (updatedProfile?.name) setName(updatedProfile.name);
+        if (updatedProfile?.username) setUsername(updatedProfile.username || '');
       }
     } catch (err) {
       console.error('Profile update error:', err);
@@ -169,7 +188,7 @@ export default function AccountSettingsPage() {
     }
   };
 
-  if (isSessionPending) {
+  if (isSessionPending || isProfileLoading) {
     return (
       <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -485,23 +504,16 @@ export default function AccountSettingsPage() {
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-red-600 dark:text-red-400">
+            <DialogTitle className="flex items-center gap-2 text-destructive">
               <AlertTriangle className="h-5 w-5" />
               Delete Account
             </DialogTitle>
             <DialogDescription>
-              This action is permanent and cannot be undone. All your data will be permanently deleted.
+              This is a permanent action that cannot be undone. All your posts, profile info, and data will be permanently removed.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
-            <Alert variant="destructive">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>
-                You will lose access to your account and all associated data immediately.
-              </AlertDescription>
-            </Alert>
-
             {deleteError && (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
@@ -511,32 +523,30 @@ export default function AccountSettingsPage() {
 
             <div className="space-y-2">
               <Label htmlFor="confirm-delete">
-                Type <span className="font-mono font-bold">DELETE</span> to confirm
+                Type <span className="font-bold">DELETE</span> to confirm
               </Label>
               <Input
                 id="confirm-delete"
-                type="text"
                 placeholder="DELETE"
                 value={deleteConfirmText}
-                onChange={(e) => setDeleteConfirmText(e.target.value.toUpperCase())}
-                className="font-mono"
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                autoFocus
               />
             </div>
           </div>
 
-          <DialogFooter className="flex-col sm:flex-row gap-2">
+          <DialogFooter>
             <Button
               variant="outline"
               onClick={() => setDeleteDialogOpen(false)}
-              className="w-full sm:w-auto"
+              disabled={isDeleting}
             >
               Cancel
             </Button>
-            <Button 
+            <Button
               variant="destructive"
               onClick={handleDeleteAccount}
               disabled={isDeleting || deleteConfirmText !== 'DELETE'}
-              className="w-full sm:w-auto"
             >
               {isDeleting ? (
                 <>
@@ -544,10 +554,7 @@ export default function AccountSettingsPage() {
                   Deleting...
                 </>
               ) : (
-                <>
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete Account
-                </>
+                'Delete Permanently'
               )}
             </Button>
           </DialogFooter>
@@ -556,11 +563,4 @@ export default function AccountSettingsPage() {
     </div>
   );
 }
-
-
-
-
-
-
-
 
