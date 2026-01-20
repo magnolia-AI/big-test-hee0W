@@ -4,90 +4,66 @@
 
 @layer base {
   :root {
-    /* Brand Typography */
-    --font-heading: var(--font-heading);
-    --font-body: var(--font-body);
-    --font-mono: var(--font-mono);
-
-    /* Editorial Sharp Geometry */
-    --radius: 0px;
-
-    /* Editorial Brand Palette (OKLCH) */
-    --background: 1 0 0;           /* Canvas White */
-    --foreground: 0.1 0 0;         /* Editorial Black */
-
-    --card: 1 0 0;
-    --card-foreground: 0.1 0 0;
-
-    --popover: 1 0 0;
-    --popover-foreground: 0.1 0 0;
-
-    --primary: 0.1 0 0;            /* Editorial Black */
-    --primary-foreground: 1 0 0;   /* Canvas White */
-
-    --secondary: 0.95 0.01 100;    /* Vogue Greige / Light Mist */
-    --secondary-foreground: 0.1 0 0;
-
-    --muted: 0.95 0.01 100;
-    --muted-foreground: 0.4 0 0;   /* Graphite / Smoke */
-
-    --accent: 0.88 0.2 110;        /* Highlighter Chartreuse (Selection/Hover) */
-    --accent-foreground: 0.1 0 0;
-
-    --destructive: 0.6 0.25 27;    /* Scandal Red */
-    --destructive-foreground: 1 0 0;
-
-    --border: 0.1 0 0;             /* High-contrast Black borders */
-    --input: 0.1 0 0;
-    --ring: 0.1 0 0;
-
-    --sidebar: 1 0 0;
-    --sidebar-foreground: 0.1 0 0;
-    --sidebar-primary: 0.1 0 0;
-    --sidebar-primary-foreground: 1 0 0;
-    --sidebar-accent: 0.88 0.2 110;
-    --sidebar-accent-foreground: 0.1 0 0;
-    --sidebar-border: 0.1 0 0;
-    --sidebar-ring: 0.1 0 0;
+    /* Editorial Palette */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 4%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 4%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 4%;
+    
+    --primary: 0 0% 4%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 4%;
+    
+    --muted: 0 0% 94%;
+    --muted-foreground: 0 0% 40%;
+    
+    --accent: 70 100% 50%; /* Highlighter Chartreuse */
+    --accent-foreground: 0 0% 4%;
+    
+    --destructive: 2 100% 56%; /* Scandal Red */
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 0 0% 4%;
+    
+    --radius: 0px; /* Radical Sharp Edges */
   }
 
   .dark {
-    --background: 0.1 0 0;         /* Editorial Black */
-    --foreground: 1 0 0;           /* Canvas White */
-
-    --card: 0.1 0 0;
-    --card-foreground: 1 0 0;
-
-    --popover: 0.1 0 0;
-    --popover-foreground: 1 0 0;
-
-    --primary: 1 0 0;              /* Canvas White */
-    --primary-foreground: 0.1 0 0; /* Editorial Black */
-
-    --secondary: 0.2 0 0;          /* Graphite / Charcoal */
-    --secondary-foreground: 1 0 0;
-
-    --muted: 0.2 0 0;
-    --muted-foreground: 0.6 0 0;   /* Smoke */
-
-    --accent: 0.88 0.2 110;        /* Chartreuse stays vibrant */
-    --accent-foreground: 0.1 0 0;
-
-    --destructive: 0.6 0.25 27;    /* Scandal Red */
-    --destructive-foreground: 1 0 0;
-
-    --border: 1 0 0;
-    --input: 1 0 0;
-    --ring: 1 0 0;
-
-    --sidebar: 0.1 0 0;
-    --sidebar-foreground: 1 0 0;
-    --sidebar-primary: 1 0 0;
-    --sidebar-primary-foreground: 0.1 0 0;
-    --sidebar-accent: 0.2 0 0;
-    --sidebar-accent-foreground: 1 0 0;
-    --sidebar-border: 1 0 0;
-    --sidebar-ring: 1 0 0;
+    --background: 0 0% 4%;
+    --foreground: 0 0% 98%;
+    
+    --card: 0 0% 4%;
+    --card-foreground: 0 0% 98%;
+    
+    --popover: 0 0% 4%;
+    --popover-foreground: 0 0% 98%;
+    
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 4%;
+    
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 0 0% 98%;
+    
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 65%;
+    
+    --accent: 70 100% 50%;
+    --accent-foreground: 0 0% 4%;
+    
+    --destructive: 2 100% 56%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
+    --ring: 0 0% 80%;
   }
 }
 
@@ -96,21 +72,33 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground transition-colors duration-300;
+    @apply bg-background text-foreground font-body;
   }
   
-  /* Brand Typography Classes */
-  .font-heading {
+  h1, h2, h3, h4, .font-heading {
     font-family: var(--font-heading);
+    @apply tracking-tight;
   }
-  
+
   .logo-text {
-    font-family: var(--font-heading);
-    font-style: italic;
-    font-weight: 900;
-    letter-spacing: -0.05em;
-    text-transform: uppercase;
+    @apply font-heading italic font-black uppercase tracking-tighter;
+  }
+
+  /* Editorial Spacing & Textures */
+  .editorial-grid {
+    background-image: linear-gradient(to right, hsl(var(--border)) 1px, transparent 1px);
+    background-size: 4rem 100%;
   }
 }
 
+/* Custom Utilities for High Fashion Look */
+@layer utilities {
+  .text-editorial-metadata {
+    @apply text-[10px] uppercase font-bold tracking-[0.2em] opacity-60 transition-opacity hover:opacity-100;
+  }
+  
+  .sharp-cta {
+    @apply border-2 border-primary bg-transparent text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300 uppercase tracking-widest font-bold;
+  }
+}
 
