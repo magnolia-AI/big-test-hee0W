@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Home, Search, Bell, Mail, User, Settings, PenLine, LogOut } from 'lucide-react';
+import { Home, Search, Bell, Mail, User, Settings, PenLine, LogOut, Bird } from 'lucide-react';
 import { authClient } from '@/lib/auth/client';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -36,9 +36,14 @@ export function LeftSidebar() {
   return (
     <div className="hidden md:flex flex-col w-64 border-r min-h-screen p-4 sticky top-0 h-screen justify-between">
       <div className="space-y-6">
-        <div className="px-4 py-2">
-          <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
-            Chirp
+        <div className="px-4 py-4">
+          <Link href="/" className="flex items-center gap-2 group transition-all">
+            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-tr from-primary to-purple-600 shadow-md shadow-primary/20 group-hover:scale-105 transition-transform">
+              <Bird className="h-6 w-6 text-white" />
+            </div>
+            <span className="text-2xl font-black tracking-tighter bg-gradient-to-r from-primary via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+              Chirp
+            </span>
           </Link>
         </div>
 
@@ -110,6 +115,8 @@ export function LeftSidebar() {
     </div>
   );
 }
+
+
 
 
 

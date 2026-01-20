@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Home, Search, Bell, Mail, User, Settings, PenLine, LogOut } from 'lucide-react';
+import { Home, Search, Bell, Mail, User, Settings, PenLine, LogOut, Bird } from 'lucide-react';
 import { authClient } from '@/lib/auth/client';
 import { getProfile } from '@/app/actions/profile';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -83,9 +83,14 @@ export function AppSidebar({ user: initialUser }: { user?: any }) {
 
   return (
     <Sidebar collapsible="icon" className="border-r border-border">
-      <SidebarHeader className="h-16 flex-row items-center justify-between px-4">
-        <Link href="/" className={cn("text-2xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent transition-all", isCollapsed && "hidden")}>
-          Chirp
+      <SidebarHeader className="h-20 flex-row items-center justify-between px-4">
+        <Link href="/" className={cn("flex items-center gap-2 group transition-all", isCollapsed && "hidden")}>
+          <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-tr from-primary to-purple-600 shadow-md shadow-primary/20 group-hover:scale-105 transition-transform">
+            <Bird className="h-6 w-6 text-white" />
+          </div>
+          <span className="text-2xl font-black tracking-tighter bg-gradient-to-r from-primary via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+            Chirp
+          </span>
         </Link>
         <SidebarTrigger className={cn(isCollapsed && "mx-auto")} />
       </SidebarHeader>
@@ -172,4 +177,6 @@ export function AppSidebar({ user: initialUser }: { user?: any }) {
     </Sidebar>
   );
 }
+
+
 
