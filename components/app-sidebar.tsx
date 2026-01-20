@@ -1,8 +1,10 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Home, Search, Bell, Mail, User, Settings, PenLine, LogOut } from 'lucide-react';
 import { authClient } from '@/lib/auth/client';
+import { getProfile } from '@/app/actions/profile';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   Sidebar,
@@ -29,9 +31,33 @@ import { cn } from '@/lib/utils';
 export function AppSidebar({ user: initialUser }: { user?: any }) {
   const pathname = usePathname();
   const { data: session } = authClient.useSession();
-  const user = session?.user || initialUser;
+  
+  // Database user profile state
+  const [dbUser, setDbUser] = useState<any>(null);
+  
+  // Combine session user with DB user, prioritizing DB user for display fields
+  const authUser = session?.user || initialUser;
+  const displayUser = dbUser ? { ...authUser, ...dbUser } : authUser;
+  
   const { state } = useSidebar();
   const isCollapsed = state === 'collapsed';
+
+  // Fetch updated profile from DB on mount and when session changes
+  useEffect(() => {
+    async function fetchDBProfile() {
+      if (authUser?.id) {
+        try {
+          const profile = await getProfile();
+          if (profile) {
+            setDbUser(profile);
+          }
+        } catch (error) {
+          console.error('Failed to fetch sidebar profile:', error);
+        }
+      }
+    }
+    fetchDBProfile();
+  }, [authUser?.id]);
 
   const handleSignOut = async () => {
     await authClient.signOut();
@@ -51,7 +77,7 @@ export function AppSidebar({ user: initialUser }: { user?: any }) {
     { icon: Search, label: 'Explore', href: '/explore' },
     { icon: Bell, label: 'Notifications', href: '/notifications' },
     { icon: Mail, label: 'Messages', href: '/messages' },
-    { icon: User, label: 'Profile', href: user ? `/profile/${user.id}` : '/auth/sign-in' },
+    { icon: User, label: 'Profile', href: displayUser ? `/profile/${displayUser.id}` : '/auth/sign-in' },
     { icon: Settings, label: 'Settings', href: '/account/settings' },
   ];
 
@@ -101,7 +127,7 @@ export function AppSidebar({ user: initialUser }: { user?: any }) {
       </SidebarContent>
 
       <SidebarFooter className={cn("p-4", isCollapsed && "p-1")}>
-        {user ? (
+        {displayUser ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <SidebarMenuButton
@@ -113,12 +139,12 @@ export function AppSidebar({ user: initialUser }: { user?: any }) {
               >
                 <div className={cn("flex items-center gap-3 text-left w-full", isCollapsed && "justify-center")}>
                   <Avatar className={cn("h-10 w-10", isCollapsed && "h-8 w-8")}>
-                    <AvatarImage src={user.image || ''} />
-                    <AvatarFallback>{user.name?.[0]}</AvatarFallback>
+                    <AvatarImage src={displayUser.image || ''} />
+                    <AvatarFallback>{displayUser.name?.[0]}</AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col flex-1 overflow-hidden transition-all group-data-[collapsible=icon]:hidden">
-                    <span className="font-bold truncate">{user.name}</span>
-                    <span className="text-xs text-muted-foreground truncate">@{(user as any).username || 'user'}</span>
+                    <span className="font-bold truncate">{displayUser.name}</span>
+                    <span className="text-xs text-muted-foreground truncate">@{displayUser.username || 'user'}</span>
                   </div>
                 </div>
               </SidebarMenuButton>
@@ -146,12 +172,4 @@ export function AppSidebar({ user: initialUser }: { user?: any }) {
     </Sidebar>
   );
 }
-
-
-
-
-
-
-
-
 
