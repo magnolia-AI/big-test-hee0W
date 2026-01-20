@@ -38,6 +38,14 @@ export function AppSidebar({ user: initialUser }: { user?: any }) {
     window.location.href = '/';
   };
 
+  const handlePostClick = () => {
+    const composer = document.getElementById('main-tweet-composer');
+    if (composer) {
+      composer.focus();
+      composer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
+
   const navItems = [
     { icon: Home, label: 'Home', href: '/' },
     { icon: Search, label: 'Explore', href: '/explore' },
@@ -80,11 +88,11 @@ export function AppSidebar({ user: initialUser }: { user?: any }) {
 
         <div className={cn("px-2 mt-4", isCollapsed && "px-0 flex justify-center")}>
             {isCollapsed ? (
-                 <Button className="rounded-full h-10 w-10 p-0 aspect-square shadow-lg" size="icon">
+                 <Button onClick={handlePostClick} className="rounded-full h-10 w-10 p-0 aspect-square shadow-lg" size="icon">
                     <PenLine className="h-5 w-5" />
                  </Button>
             ) : (
-                <Button className="w-full rounded-full h-12 text-lg font-bold shadow-lg" size="lg">
+                <Button onClick={handlePostClick} className="w-full rounded-full h-12 text-lg font-bold shadow-lg" size="lg">
                     <PenLine className="mr-2 h-5 w-5" />
                     Post
                 </Button>
@@ -138,6 +146,8 @@ export function AppSidebar({ user: initialUser }: { user?: any }) {
     </Sidebar>
   );
 }
+
+
 
 
 

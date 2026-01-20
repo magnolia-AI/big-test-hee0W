@@ -46,6 +46,7 @@ export function TweetComposer({ parentId, placeholder = "What is happening?!", c
         {parentId && <input type="hidden" name="parentId" value={parentId} />}
         <Textarea 
           name="content"
+          id={!parentId ? "main-tweet-composer" : undefined}
           placeholder={placeholder} 
           className="min-h-[100px] resize-none border-none focus-visible:ring-0 p-0 text-xl placeholder:text-muted-foreground/50"
         />
@@ -59,6 +60,7 @@ export function TweetComposer({ parentId, placeholder = "What is happening?!", c
     </div>
   );
 }
+
 
 
 
