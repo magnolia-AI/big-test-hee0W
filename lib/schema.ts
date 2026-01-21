@@ -1,5 +1,5 @@
-import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
-import { relations } from 'drizzle-orm';
+import { pgTable, text, timestamp, uuid, pgPolicy } from 'drizzle-orm/pg-core';
+import { relations, sql } from 'drizzle-orm';
 
 // Users table (profiles)
 export const users = pgTable('users', {
@@ -11,7 +11,18 @@ export const users = pgTable('users', {
   avatarUrl: text('avatar_url'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull().$onUpdate(() => new Date()),
-});
+}, (table) => ({
+  publicRead: pgPolicy("public_read_users", {
+    for: "select",
+    to: "public",
+    using: sql`true`,
+  }),
+  ownerModify: pgPolicy("owner_modify_users", {
+    for: "all",
+    to: "public",
+    using: sql`id = (select current_setting('request.jwt.claims', true)::json->>'sub')`,
+  }),
+})).enableRLS();
 
 // Tweets table
 export const tweets = pgTable('tweets', {
@@ -21,25 +32,56 @@ export const tweets = pgTable('tweets', {
   parentId: uuid('parent_id'), // For replies - self reference
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull().$onUpdate(() => new Date()),
-});
+}, (table) => ({
+  publicRead: pgPolicy("public_read_tweets", {
+    for: "select",
+    to: "public",
+    using: sql`true`,
+  }),
+  authorModify: pgPolicy("author_modify_tweets", {
+    for: "all",
+    to: "public",
+    using: sql`author_id = (select current_setting('request.jwt.claims', true)::json->>'sub')`,
+  }),
+})).enableRLS();
 
 // Likes join table
 export const likes = pgTable('likes', {
   userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   tweetId: uuid('tweet_id').notNull().references(() => tweets.id, { onDelete: 'cascade' }),
   createdAt: timestamp('created_at').defaultNow().notNull(),
-}, (t) => ({
-  pk: [t.userId, t.tweetId],
-}));
+}, (table) => ({
+  pk: [table.userId, table.tweetId],
+  publicRead: pgPolicy("public_read_likes", {
+    for: "select",
+    to: "public",
+    using: sql`true`,
+  }),
+  userModify: pgPolicy("user_modify_likes", {
+    for: "all",
+    to: "public",
+    using: sql`user_id = (select current_setting('request.jwt.claims', true)::json->>'sub')`,
+  }),
+})).enableRLS();
 
 // Follows join table
 export const follows = pgTable('follows', {
   followerId: text('follower_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   followingId: text('following_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   createdAt: timestamp('created_at').defaultNow().notNull(),
-}, (t) => ({
-  pk: [t.followerId, t.followingId],
-}));
+}, (table) => ({
+  pk: [table.followerId, table.followingId],
+  publicRead: pgPolicy("public_read_follows", {
+    for: "select",
+    to: "public",
+    using: sql`true`,
+  }),
+  followerModify: pgPolicy("follower_modify_follows", {
+    for: "all",
+    to: "public",
+    using: sql`follower_id = (select current_setting('request.jwt.claims', true)::json->>'sub')`,
+  }),
+})).enableRLS();
 
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
