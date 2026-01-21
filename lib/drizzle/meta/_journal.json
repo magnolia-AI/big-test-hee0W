@@ -8,6 +8,13 @@
       "when": 1768853237831,
       "tag": "0000_sweet_vapor",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1768997120213,
+      "tag": "0001_left_living_mummy",
+      "breakpoints": true
     }
   ]
 }
