@@ -3,7 +3,7 @@ import { relations, sql } from 'drizzle-orm';
 
 // Users table (profiles)
 export const users = pgTable('users', {
-  id: text('id').primaryKey(), // Matches Auth User ID
+  id: text('id').primaryKey(),
   name: text('name').notNull(),
   email: text('email').notNull().unique(),
   username: text('username').unique(),
@@ -29,7 +29,7 @@ export const tweets = pgTable('tweets', {
   id: uuid('id').defaultRandom().primaryKey(),
   content: text('content').notNull(),
   authorId: text('author_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  parentId: uuid('parent_id'), // For replies
+  parentId: uuid('parent_id'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull().$onUpdate(() => new Date()),
 }, (table) => ({
